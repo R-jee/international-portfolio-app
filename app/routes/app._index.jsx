@@ -89,7 +89,7 @@ export default function Index() {
 
   useEffect(() => {
     if (productId) {
-      shopify.toast.show("Product created");
+      shopify.toast.show("Product created! Product ID =  " + productId);
     }
   }, [productId]);
 
@@ -97,14 +97,13 @@ export default function Index() {
 
   return (
     <Page>
-      <ui-title-bar title="Remix app template">
-        <button variant="primary" onClick={generateProduct}>
-          Generate a product
-        </button>
+      <ui-title-bar title="ECOM Latest Polaris">
+        <button variant="primary" onClick={generateProduct}>Generate a product</button>
       </ui-title-bar>
       <VerticalStack gap="5">
         <Layout>
           <Layout.Section>
+          <HorizontalStack gap="5">
             <Card>
               <VerticalStack gap="5">
                 <VerticalStack gap="2">
@@ -179,6 +178,9 @@ export default function Index() {
                 )}
               </VerticalStack>
             </Card>
+            <Card>Test</Card>
+          </HorizontalStack>
+
           </Layout.Section>
           <Layout.Section secondary>
             <VerticalStack gap="5">
