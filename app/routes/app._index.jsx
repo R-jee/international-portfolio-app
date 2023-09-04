@@ -50,6 +50,9 @@ export async function action({ request }) {
                   price
                   barcode
                   createdAt
+                  inventoryItem{
+                    tracked
+                  }
                 }
               }
             }
@@ -60,7 +63,7 @@ export async function action({ request }) {
       variables: {
         input: {
           title: `${color} Snowboard`,
-          variants: [{ price: Math.random() * 100 }],
+          variants: [{ price: Math.random() * 100 , inventoryItem: {tracked: true} }],
         },
       },
     }
@@ -178,7 +181,7 @@ export default function Index() {
                 )}
               </VerticalStack>
             </Card>
-            <Card>Test</Card>
+            <Card>Test</Card><Card>Test</Card><Card>Test</Card>
           </HorizontalStack>
 
           </Layout.Section>
