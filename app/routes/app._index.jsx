@@ -116,7 +116,7 @@ const QRTable = ({ qrCodes }) => (
     }}
     itemCount={qrCodes.length}
     headings={[
-      { title: "Thumbnail",/*, hidden: true */ },
+      { title: "Thumbnail", hidden: true },
       { title: "Title" },
       { title: "Product" },
       { title: "Date created" },
@@ -166,6 +166,7 @@ const QRTableRow = ({ qrCode }) => (
 
 export default function Index() {
   const nav = useNavigation();
+  const { qrCodes } = useLoaderData();
   const navigate = useNavigate();
   const { shop } = useLoaderData();
   const actionData = useActionData();
@@ -270,11 +271,12 @@ export default function Index() {
                   )}
                 </VerticalStack>
               </Card>
+              <QRApp />
             </HorizontalStack>
-            <QRApp />
           </Layout.Section>
           <Layout.Section secondary>
             <VerticalStack gap="5">
+              <ShowCreateQR />
               <Card>
                 <VerticalStack gap="2">
                   <Text as="h2" variant="headingMd">
@@ -361,7 +363,7 @@ export default function Index() {
                   </List>
                 </VerticalStack>
               </Card>
-              <EmptyQRCodeState onAction={() => navigate("qrcodes/new")} />
+
             </VerticalStack>
           </Layout.Section>
         </Layout>
@@ -376,14 +378,29 @@ function QRApp() {
   const navigate = useNavigate();
 
   return (
-    <HorizontalStack gap="2">
-      <Card padding="0">
+    <Card padding="0">
+      <VerticalStack gap="2">
         {qrCodes.length === 0 ? (
           <EmptyQRCodeState onAction={() => navigate("qrcodes/new")} />
         ) : (
           <QRTable qrCodes={qrCodes} />
         )}
-      </Card>
-    </HorizontalStack>
+      </VerticalStack>
+    </Card>
+  );
+}
+
+function ShowCreateQR(){
+  const { qrCodes } = useLoaderData();
+  const navigate = useNavigate();
+
+  return (
+    <Card padding="5">
+      <VerticalStack gap="2">
+        {qrCodes.length > 0 ? (
+          <EmptyQRCodeState onAction={() => navigate("qrcodes/new")} />
+        ) : null }
+      </VerticalStack>
+    </Card>
   );
 }
