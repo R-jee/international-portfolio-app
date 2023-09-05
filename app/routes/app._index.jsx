@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import { json } from "@remix-run/node";
 import {
+  Link as XLink,
   useActionData,
   useLoaderData,
   useNavigation,
+  useNavigate,
   useSubmit,
 } from "@remix-run/react";
 import {
@@ -18,14 +20,21 @@ import {
   Divider,
   List,
   Link,
+  EmptyState,
+  IndexTable,
+  Thumbnail,
+  Icon,
 } from "@shopify/polaris";
 
 import { authenticate } from "../shopify.server";
+import { getQRCodes } from "../models/QRCode.server";
+import { DiamondAlertMajor, ImageMajor } from "@shopify/polaris-icons";
 
 export const loader = async ({ request }) => {
-  const { session } = await authenticate.admin(request);
+  const { admin, session } = await authenticate.admin(request);
+  const qrCodes = await getQRCodes(session.shop, admin.graphql);
 
-  return json({ shop: session.shop.replace(".myshopify.com", "") });
+  return json({ shop: session.shop.replace(".myshopify.com", ""), qrCodes });
 };
 
 export async function action({ request }) {
@@ -76,8 +85,88 @@ export async function action({ request }) {
   });
 }
 
+
+const EmptyQRCodeState = ({ onAction }) => (
+  <VerticalStack>
+      <EmptyState
+      heading="Create unique QR codes for your product"
+      action={{
+        content: "Create QR code",
+        onAction,
+      }}
+      image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+    >
+      <p>Allow customers to scan codes and buy products using their phones.</p>
+    </EmptyState>
+  </VerticalStack>
+);
+
+function truncate(str, { length = 25 } = {}) {
+  if (!str) return "";
+  if (str.length <= length) return str;
+  return str.slice(0, length) + "…";
+}
+
+const QRTable = ({ qrCodes }) => (
+
+  <IndexTable
+    resourceName={{
+      singular: "QR code",
+      plural: "QR codes",
+    }}
+    itemCount={qrCodes.length}
+    headings={[
+      { title: "Thumbnail",/*, hidden: true */ },
+      { title: "Title" },
+      { title: "Product" },
+      { title: "Date created" },
+      { title: "Scans" },
+    ]}
+    selectable={false}
+  >
+    {qrCodes.map((qrCode) => (
+      <QRTableRow key={qrCode.id} qrCode={qrCode} />
+    ))}
+  </IndexTable>
+);
+
+const QRTableRow = ({ qrCode }) => (
+  <IndexTable.Row id={qrCode.id} position={qrCode.id}>
+    <IndexTable.Cell>
+      <Thumbnail
+        source={qrCode.productImage || ImageMajor}
+        alt={qrCode.productTitle}
+        size="small"
+      />
+    </IndexTable.Cell>
+    <IndexTable.Cell>
+      <XLink to={`qrcodes/${qrCode.id}`}>{truncate(qrCode.title)}</XLink>
+    </IndexTable.Cell>
+    <IndexTable.Cell>
+      {qrCode.productDeleted ? (
+        <HorizontalStack align="start" gap="2">
+          <span style={{ width: "20px" }}>
+            <Icon source={DiamondAlertMajor} color="critical" />
+          </span>
+          <Text color="critical" as="span">
+            product has been deleted
+          </Text>
+        </HorizontalStack>
+      ) : (
+        truncate(qrCode.productTitle)
+      )}
+    </IndexTable.Cell>
+    <IndexTable.Cell>
+      {new Date(qrCode.createdAt).toDateString()}
+    </IndexTable.Cell>
+    <IndexTable.Cell>{qrCode.scans}</IndexTable.Cell>
+  </IndexTable.Row>
+);
+
+
 export default function Index() {
   const nav = useNavigation();
+  const navigate = useNavigate();
   const { shop } = useLoaderData();
   const actionData = useActionData();
   const submit = useSubmit();
@@ -106,84 +195,83 @@ export default function Index() {
       <VerticalStack gap="5">
         <Layout>
           <Layout.Section>
-          <HorizontalStack gap="5">
-            <Card>
-              <VerticalStack gap="5">
-                <VerticalStack gap="2">
-                  <Text as="h2" variant="headingMd">
-                    Congrats on creating a new Shopify app 🎉
-                  </Text>
-                  <Text variant="bodyMd" as="p">
-                    This embedded app template uses{" "}
-                    <Link
-                      url="https://shopify.dev/docs/apps/tools/app-bridge"
-                      target="_blank"
-                    >
-                      App Bridge
-                    </Link>{" "}
-                    interface examples like an{" "}
-                    <Link url="/app/additional">
-                      additional page in the app nav
-                    </Link>
-                    , as well as an{" "}
-                    <Link
-                      url="https://shopify.dev/docs/api/admin-graphql"
-                      target="_blank"
-                    >
-                      Admin GraphQL
-                    </Link>{" "}
-                    mutation demo, to provide a starting point for app
-                    development.
-                  </Text>
-                </VerticalStack>
-                <VerticalStack gap="2">
-                  <Text as="h3" variant="headingMd">
-                    Get started with products
-                  </Text>
-                  <Text as="p" variant="bodyMd">
-                    Generate a product with GraphQL and get the JSON output for
-                    that product. Learn more about the{" "}
-                    <Link
-                      url="https://shopify.dev/docs/api/admin-graphql/latest/mutations/productCreate"
-                      target="_blank"
-                    >
-                      productCreate
-                    </Link>{" "}
-                    mutation in our API references.
-                  </Text>
-                </VerticalStack>
-                <HorizontalStack gap="3" align="end">
-                  {actionData?.product && (
-                    <Button
-                      url={`https://admin.shopify.com/store/${shop}/admin/products/${productId}`}
-                      target="_blank"
-                    >
-                      View product
+            <HorizontalStack gap="5">
+              <Card>
+                <VerticalStack gap="5">
+                  <VerticalStack gap="2">
+                    <Text as="h2" variant="headingMd">
+                      Congrats on creating a new Shopify app 🎉
+                    </Text>
+                    <Text variant="bodyMd" as="p">
+                      This embedded app template uses{" "}
+                      <Link
+                        url="https://shopify.dev/docs/apps/tools/app-bridge"
+                        target="_blank"
+                      >
+                        App Bridge
+                      </Link>{" "}
+                      interface examples like an{" "}
+                      <Link url="/app/additional">
+                        additional page in the app nav
+                      </Link>
+                      , as well as an{" "}
+                      <Link
+                        url="https://shopify.dev/docs/api/admin-graphql"
+                        target="_blank"
+                      >
+                        Admin GraphQL
+                      </Link>{" "}
+                      mutation demo, to provide a starting point for app
+                      development.
+                    </Text>
+                  </VerticalStack>
+                  <VerticalStack gap="2">
+                    <Text as="h3" variant="headingMd">
+                      Get started with products
+                    </Text>
+                    <Text as="p" variant="bodyMd">
+                      Generate a product with GraphQL and get the JSON output for
+                      that product. Learn more about the{" "}
+                      <Link
+                        url="https://shopify.dev/docs/api/admin-graphql/latest/mutations/productCreate"
+                        target="_blank"
+                      >
+                        productCreate
+                      </Link>{" "}
+                      mutation in our API references.
+                    </Text>
+                  </VerticalStack>
+                  <HorizontalStack gap="3" align="end">
+                    {actionData?.product && (
+                      <Button
+                        url={`https://admin.shopify.com/store/${shop}/admin/products/${productId}`}
+                        target="_blank"
+                      >
+                        View product
+                      </Button>
+                    )}
+                    <Button loading={isLoading} primary onClick={generateProduct}>
+                      Generate a product
                     </Button>
+                  </HorizontalStack>
+                  {actionData?.product && (
+                    <Box
+                      padding="4"
+                      background="bg-subdued"
+                      borderColor="border"
+                      borderWidth="1"
+                      borderRadius="2"
+                      overflowX="scroll"
+                    >
+                      <pre style={{ margin: 0 }}>
+                        <code>{JSON.stringify(actionData.product, null, 2)}</code>
+                      </pre>
+                    </Box>
                   )}
-                  <Button loading={isLoading} primary onClick={generateProduct}>
-                    Generate a product
-                  </Button>
-                </HorizontalStack>
-                {actionData?.product && (
-                  <Box
-                    padding="4"
-                    background="bg-subdued"
-                    borderColor="border"
-                    borderWidth="1"
-                    borderRadius="2"
-                    overflowX="scroll"
-                  >
-                    <pre style={{ margin: 0 }}>
-                      <code>{JSON.stringify(actionData.product, null, 2)}</code>
-                    </pre>
-                  </Box>
-                )}
-              </VerticalStack>
-            </Card>
-            <Card>Test</Card><Card>Test</Card><Card>Test</Card>
-          </HorizontalStack>
-
+                </VerticalStack>
+              </Card>
+            </HorizontalStack>
+            <QRApp />
           </Layout.Section>
           <Layout.Section secondary>
             <VerticalStack gap="5">
@@ -273,10 +361,29 @@ export default function Index() {
                   </List>
                 </VerticalStack>
               </Card>
+              <EmptyQRCodeState onAction={() => navigate("qrcodes/new")} />
             </VerticalStack>
           </Layout.Section>
         </Layout>
       </VerticalStack>
     </Page>
+  );
+}
+
+
+function QRApp() {
+  const { qrCodes } = useLoaderData();
+  const navigate = useNavigate();
+
+  return (
+    <HorizontalStack gap="2">
+      <Card padding="0">
+        {qrCodes.length === 0 ? (
+          <EmptyQRCodeState onAction={() => navigate("qrcodes/new")} />
+        ) : (
+          <QRTable qrCodes={qrCodes} />
+        )}
+      </Card>
+    </HorizontalStack>
   );
 }

@@ -1,6 +1,3 @@
-import { useActionData  } from "@remix-run/react";
-import { json } from "@remix-run/node"; // or cloudflare/deno
-import { useSubmit, useNavigation } from "@remix-run/react";
 import {
   Box,
   Card,
@@ -9,7 +6,6 @@ import {
   List,
   Page,
   Text,
-  Form,
   VerticalStack,
 } from "@shopify/polaris";
 
@@ -21,7 +17,24 @@ export default function AdditionalPage() {
         <Layout.Section>
           <Card>
             <VerticalStack gap="3">
-                <CreateFormSubmit />
+              <Text as="p" variant="bodyMd">
+                The app template comes with an additional page which
+                demonstrates how to create multiple pages within app navigation
+                using{" "}
+                <Link
+                  url="https://shopify.dev/docs/apps/tools/app-bridge"
+                  target="_blank"
+                >
+                  App Bridge
+                </Link>
+                .
+              </Text>
+              <Text as="p" variant="bodyMd">
+                To create your own page and have it show up in the app
+                navigation, add a page inside <Code>app/routes</Code>, and a
+                link to it in the <Code>&lt;ui-nav-menu&gt;</Code> component
+                found in <Code>app/routes/app.jsx</Code>.
+              </Text>
             </VerticalStack>
           </Card>
         </Layout.Section>
@@ -63,14 +76,5 @@ function Code({ children }) {
     >
       <code>{children}</code>
     </Box>
-  );
-}
-
-function CreateFormSubmit() {
-  return (
-    <Form method="post" action="/form?index">
-      <input type="text" name="title" />
-      <input type="text" name="description" />
-    </Form>
   );
 }

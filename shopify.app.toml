@@ -2,7 +2,7 @@
 
 name = "polaris-app"
 client_id = "ae5a05879e8d77a8776bc1e281648a71"
-application_url = "https://reliance-mongolia-automatically-select.trycloudflare.com"
+application_url = "https://rico-midlands-reporters-destinations.trycloudflare.com"
 embedded = true
 
 [access_scopes]
@@ -12,9 +12,9 @@ use_legacy_install_flow = true
 
 [auth]
 redirect_urls = [
-  "https://reliance-mongolia-automatically-select.trycloudflare.com/auth/callback",
-  "https://reliance-mongolia-automatically-select.trycloudflare.com/auth/shopify/callback",
-  "https://reliance-mongolia-automatically-select.trycloudflare.com/api/auth/callback"
+  "https://rico-midlands-reporters-destinations.trycloudflare.com/auth/callback",
+  "https://rico-midlands-reporters-destinations.trycloudflare.com/auth/shopify/callback",
+  "https://rico-midlands-reporters-destinations.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
