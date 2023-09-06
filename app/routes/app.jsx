@@ -3,6 +3,8 @@ import { Link, Outlet, useLoaderData, useRouteError } from "@remix-run/react";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css";
 import { boundary } from "@shopify/shopify-app-remix/server";
 import { AppProvider } from "@shopify/shopify-app-remix/react";
+import { Icon } from '@shopify/polaris';
+import { SettingsMajor } from '@shopify/polaris-icons';
 
 import { authenticate } from "../shopify.server";
 
@@ -24,6 +26,7 @@ export default function App() {
           Home
         </Link>
         <Link to="/app/additional">Additional page</Link>
+        <Link to="/app/settings"><Icon source={SettingsMajor} color="base" />Settings</Link>
       </ui-nav-menu>
       <Outlet />
     </AppProvider>

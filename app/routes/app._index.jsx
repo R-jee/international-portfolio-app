@@ -189,7 +189,10 @@ export default function Index() {
   const generateProduct = () => submit({}, { replace: true, method: "POST" });
 
   return (
-    <Page>
+    <Page
+      backAction={{content: 'Products', url: '/app'}}
+      title="Jar With Lock-Lid"
+      >
       <ui-title-bar title="ECOM Latest Polaris">
         <button variant="primary" onClick={generateProduct}>Generate a product</button>
       </ui-title-bar>
